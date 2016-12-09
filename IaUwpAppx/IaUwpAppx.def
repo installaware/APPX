@@ -1,0 +1,21 @@
+; IaUwpAppx.def : Declares the module parameters for the DLL.
+
+LIBRARY
+
+EXPORTS
+    UAPPX_Initialize
+	UAPPX_Finalize
+	UAPPX_Free
+
+	UAPPX_SetDisplayName
+	UAPPX_SetFileAssociation
+	UAPPX_SetLanguage
+	UAPPX_SetPackageFile
+	UAPPX_SetPackageDirectory
+	UAPPX_SetPublisher
+	UAPPX_SetPublisherCertificate
+	UAPPX_SetShortcut
+	UAPPX_SetVersion
+	UAPPX_SetVirtualRegistryKey
+
+	UAPPX_SetWinSdkBinPath
