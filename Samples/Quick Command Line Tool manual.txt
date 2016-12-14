@@ -1,0 +1,43 @@
+Quick Command Line Tool for Creating APPX Applications
+
+Purpose: This tool is based on the open source InstallAware APPX Library, wrapping the library inside a quick command line interface which converts traditional Win32/Win64/.NET apps to modern Universal Windows Platform APPX binaries, ready for submission to the Windows Store, and without requiring Visual Studio 2017.
+
+Requirements: This tool requires the Windows 10 SDK, as it consumes the MAKEAPPX and SIGNTOOL binaries included in the SDK. This tool also requires the open source InstallAware APPX Library itself, IaUwpAppx.dll, as well as its dependency libraries dffileop.dll and dfregistry.dll. These dependencies and binaries are provided in the "bin x86" and "bin x64" subfolders of the "samples" folder, for 32-bit and 64-bit platforms respectively.
+
+Usage:
+
+IaAppxBuilder.exe /s <source file> /o <output folder> /n <package name> /v <package version> [/x 0 | 1] [/c <certificate file>] [/p <certificate password>] [/t <certificate time stamp server>
+
+Mandatory Command Line Parameters:
+
+/s = source file (full path)
+This parameter specifies the source Win32/Win64/.NET binary to convert into an APPX.
+
+/o = output directory
+This parameter specifies the output folder for the UWP/APPX binary.
+
+/n = package name
+This is the human readable name of the APPX package to create.
+
+/v = package version
+This is the human readable version number of the APPX package to create.
+
+Optional Command Line Parameters:
+
+/x = package platform
+Specify 0 in this field to indicate the i386 (32-bit) platform or 1 to indicate the AMD64 (64-bit) platform. The default value is 0 (targeting 32-bit platforms).
+
+/c = code signing certificate file (full path)
+Packages must be code signed to be admitted to the Windows Store. Specify the full path to your code signing certificate here.
+
+/p = code signing certificate password
+If you have specified a code signing certificate above, enter the password for your certificate here.
+
+/t = code signing certificate time stamp server URL
+If you have specified a code signing certificate above, enter the time stamp server for your certificate here. This value is optional, but requiredf or submission to the Windows Store.
+
+Example:
+
+IaAppxBuilder.exe /s "f:\Samples\WindowsFormsApplication.exe" /o "C:\Users\Public\Documents\IaAppxBuilder" /n ApplicationX /v 1.0.0.0 /x 0 /c "F:\Common\Certificate\MyCert.pfx" /p MyCert_Pwd /t http://timestamp.comodoca.com/rfc3161
+
+InstallAware (C) 2016 - 14 Dec 2016
