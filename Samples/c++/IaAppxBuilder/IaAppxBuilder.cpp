@@ -13,10 +13,26 @@ static void g_Format(wstring& string, const WCHAR* fmt, ...)
 	va_end(vl);
 }
 
-static void WriteToConsole(wstring message)
+static void g_WriteToConsole(wstring message)
 {
 	wcout << message;
 	wcout << L"\n";
+}
+
+static void g_ShowUsage()
+{
+	wcout << L"Installaware (C) 2016\n";
+	wcout << L"IaAppxBuilder /Option <Required Parameter> [Optional Parameter]\n";
+	wcout << L"\n";
+	wcout << L"</s> \tthe source Win32/Win64/.NET binary to convert into an APPX (full path)\n";
+	wcout << L"</o> \tthe output folder for the APPX package\n";
+	wcout << L"</n> \tthe human readable name of the APPX package to create\n";
+	wcout << L"</v> \tthe human readable version number of the APPX package to create\n";
+	wcout << L"\n";
+	wcout << L"[/x] \t0 to indicate the i386 (32-bit) platform or 1 to indicate the AMD64 (64-bit) platform.\n\tThe default value is 0 (targeting 32-bit platforms).\n";
+	wcout << L"[/c] \tcode signing certificate (full path)\n";
+	wcout << L"[/p] \tsigning certificate password\n";
+	wcout << L"[/t] \tauthenticode TimeStamp URL\n";
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -26,28 +42,101 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	bool b64BitPackage = false;
 
-	wstring sPackageName = L"ApplicationX";
-	wstring sPackageOutputName = L"ApplicationX";
-	wstring sPackageOutDirectory = L"C:\\Users\\Public\\Documents\\IaAppxBuilder";
+	wstring sPackageName = L"";
+	wstring sPackageOutputName = L"";
+	wstring sPackageOutDirectory = L"";
 	wstring sManufacturer = L"InstallAware";
-	wstring sPackageVersion = L"1.0.0.0";
+	wstring sPackageVersion = L"";
 
 	wstring sAuthenticodeCert = L""; //Path to certificate file
 	wstring sAuthenticodePWD = L"";
 	wstring sAuthenticodeTimestampURL = L"";
 
 	// full path of the source EXE file eg. c:\\mypath\\WindowsFormsApplication.exe
-	wstring sSourcePath = L"...fill with a full path to source file...";
+	wstring sSourcePath = L"";
 	wstring sTargetPath = L"";
 
-	g_Format(sTargetPath, L"C:\\Program Files(x86)\\%s\\%s", sPackageName.c_str(), L"WindowsFormsApplication.exe");
 
-	wstring sShortcutName = L"ApplicationX";
-	wstring sShortcutDescription = L"Appx Test package";
+	wstring sShortcutName = L"";
+	wstring sShortcutDescription = L"";
+
+	for (int i = 0; argc > i; i++)
+	{
+		if (argv[i][0] == _T('/') && lstrlen(argv[i]) > 1)
+		{
+			if (argc > i + 1)
+			{
+				switch (argv[i][1])
+				{
+					case _T('s'):
+						i++;
+						sSourcePath = argv[i];
+						break;
+
+					case _T('o'):
+						i++;
+						sPackageOutDirectory = argv[i];
+						break;
+
+					case _T('n'):
+						i++;
+						sPackageName = argv[i];
+						break;
+
+					case _T('v'):
+						i++;
+						sPackageVersion = argv[i];
+						break;
+
+					case _T('x'):
+						i++;
+						if(argv[i][0] == _T('1'))
+							b64BitPackage = true;
+						else
+							b64BitPackage = false;
+
+						break;
+
+					case _T('c'):
+						i++;
+						sAuthenticodeCert = argv[i];
+						break;
+
+					case _T('p'):
+						i++;
+						sAuthenticodePWD = argv[i];
+						break;
+
+					case _T('t'):
+						i++;
+						sAuthenticodeTimestampURL = argv[i];
+						break;
+				}
+			}
+		}
+	}
+
+	if (sSourcePath.empty() || sPackageOutDirectory.empty() || sPackageName.empty() || sPackageVersion.empty())
+	{
+		g_ShowUsage();
+		return -1;
+	}
+	
+	sPackageOutputName = sPackageName;
+	sShortcutName = sPackageName;
+
+	g_Format(sShortcutDescription, L"%s package", sShortcutName.c_str());
+
+	std::wstring sSourceFilename = sSourcePath.substr(sSourcePath.find_last_of(L"/\\") + 1);
+
+	if(b64BitPackage)
+		g_Format(sTargetPath, L"C:\\Program Files\\%s\\%s", sPackageName.c_str(), sSourceFilename.c_str());
+	else
+		g_Format(sTargetPath, L"C:\\Program Files(x86)\\%s\\%s", sPackageName.c_str(), sSourceFilename.c_str());
 
 	do
 	{
-		WriteToConsole(L"Library initialization...");
+		g_WriteToConsole(L"Library initialization...");
 
 		// Intialize APPX package
 		uAppXResult = UAPPX_Initialize(sPackageOutputName.c_str(), sPackageOutDirectory.c_str(), b64BitPackage);
@@ -110,7 +199,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		
 		wstring sMessage = L"";
 		g_Format(sMessage, L"Generating package: %s\\%s.appx", sPackageOutDirectory.c_str(), sPackageOutputName.c_str());
-		WriteToConsole(sMessage);
+		g_WriteToConsole(sMessage);
 
 		// Process package
 		uAppXResult = UAPPX_Finalize();
@@ -129,9 +218,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	UAPPX_Free();
 
 	if (uAppXResult == 0)
-		WriteToConsole(L"Process completed!");
+		g_WriteToConsole(L"Process completed!");
 	else
-		WriteToConsole(sError);
+		g_WriteToConsole(sError);
 
     return (int)uAppXResult;
 }
